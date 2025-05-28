@@ -1,0 +1,220 @@
+<!-- HTML restaurado con colores originales y fondos dinámicos coherentes -->
+<!DOCTYPE html>
+
+<html lang="es">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Editor de Anillos</title>
+<style>
+    body {
+      font-family: sans-serif;
+      background: white;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2rem;
+    }
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 2rem;
+      max-width: 700px;
+      margin-bottom: 3rem;
+    }
+    .palette-buttons {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .preview {
+      position: relative;
+      width: 300px;
+      height: 300px;
+    }
+    svg {
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+    .center-dot {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 10;
+    }
+    button.palette {
+      padding: 0.3rem 0.6rem;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+  
+circle.animated-ring {
+  transition: stroke-dashoffset 2s ease-in-out;
+}
+
+</style>
+</head>
+<body>
+<!-- CONTENIDO RESTAURADO -->
+<div class="controls">
+<div>
+<label>Horas:</label>
+<input id="hours" max="12" min="0" type="number" value="0"/>
+<label>Minutos:</label>
+<input id="minutes" max="59" min="0" type="number" value="0"/>
+<label>Segundos:</label>
+<input id="seconds" max="59" min="0" type="number" value="0"/>
+<button onclick="convertTimeToPercentages()">🕒 Aplicar tiempo</button>
+</div>
+<div>
+<label>Distancia:</label>
+<select id="distanceSelect" onchange="setDotColorFromDistance()">
+<option value="">-- Selecciona --</option>
+<option value="#8A4DFF">Maratón</option>
+<option value="#0066FF">Media Maratón</option>
+<option value="#FFA94D">10K</option>
+<option value="#00FF66">5K</option>
+</select>
+</div>
+<div>
+<label>Color exterior: <input id="color1" onchange="updateRingColors()" type="color" value="#FF6B6B"/></label>
+<label>Color medio: <input id="color2" onchange="updateRingColors()" type="color" value="#FFA94D"/></label>
+<label>Color interior: <input id="color3" onchange="updateRingColors()" type="color" value="#FFD93D"/></label>
+</div>
+<div class="palette-buttons">
+<button class="palette" onclick="setPalette('#FF6B6B', '#FFA94D', '#FFD93D')">Sunset Warm</button>
+<button class="palette" onclick="setPalette('#894DFB', '#3F9DFE', '#3FCF77')">Oceanic</button>
+<button class="palette" onclick="setPalette('#FF1514', '#201C73', '#F12A2A')">Contraste Fuerte</button>
+</div>
+</div>
+<div class="preview" id="preview">
+<svg height="300" id="svg1" width="300">
+<circle cx="150" cy="150" fill="none" id="bg1" r="130" stroke="#ffe5e5" stroke-width="30"></circle>
+<circle class="animated-ring" cx="150" cy="150" fill="none" id="ring1" r="130" stroke="#FF6B6B" stroke-linecap="round" stroke-width="30"></circle>
+</svg>
+<svg height="300" id="svg2" width="300">
+<circle cx="150" cy="150" fill="none" id="bg2" r="100" stroke="#ffeccc" stroke-width="30"></circle>
+<circle class="animated-ring" cx="150" cy="150" fill="none" id="ring2" r="100" stroke="#FFA94D" stroke-linecap="round" stroke-width="30"></circle>
+</svg>
+<svg height="300" id="svg3" width="300">
+<circle cx="150" cy="150" fill="none" id="bg3" r="70" stroke="#fff4bd" stroke-width="30"></circle>
+<circle class="animated-ring" cx="150" cy="150" fill="none" id="ring3" r="70" stroke="#FFD93D" stroke-linecap="round" stroke-width="30"></circle>
+</svg>
+<div class="center-dot" id="centerDot" style="background-color: #0066FF"></div>
+</div>
+<script>
+    function convertTimeToPercentages() {
+      const h = +document.getElementById("hours").value;
+      const m = +document.getElementById("minutes").value;
+      const s = +document.getElementById("seconds").value;
+
+      const percent1 = Math.min(100, (h / 12) * 100);
+      const percent2 = Math.min(100, (m / 60) * 100);
+      const percent3 = Math.min(100, (s / 60) * 100);
+
+      setProgress("ring1", percent1, 130);
+      setProgress("ring2", percent2, 100);
+      setProgress("ring3", percent3, 70);
+    }
+
+    function setDotColorFromDistance() {
+      const select = document.getElementById("distanceSelect");
+      const color = select.value;
+      if (color) {
+        document.getElementById("centerDot").style.backgroundColor = color;
+      }
+    }
+
+    function updateRingColors() {
+      const color1 = document.getElementById("color1").value;
+      const color2 = document.getElementById("color2").value;
+      const color3 = document.getElementById("color3").value;
+
+      document.getElementById("ring1").setAttribute("stroke", color1);
+      document.getElementById("ring2").setAttribute("stroke", color2);
+      document.getElementById("ring3").setAttribute("stroke", color3);
+
+      document.getElementById("bg1").setAttribute("stroke", applyOpacity(color1, 0.25));
+      document.getElementById("bg2").setAttribute("stroke", applyOpacity(color2, 0.25));
+      document.getElementById("bg3").setAttribute("stroke", applyOpacity(color3, 0.25));
+    }
+
+    function setPalette(c1, c2, c3) {
+      document.getElementById("color1").value = c1;
+      document.getElementById("color2").value = c2;
+      document.getElementById("color3").value = c3;
+      updateRingColors();
+    }
+
+    function applyOpacity(hex, alpha) {
+      const r = parseInt(hex.substr(1,2), 16);
+      const g = parseInt(hex.substr(3,2), 16);
+      const b = parseInt(hex.substr(5,2), 16);
+      return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    }
+
+    function setProgress(circleId, percent, radius) {
+      const circle = document.getElementById(circleId);
+      const circumference = 2 * Math.PI * radius;
+      circle.style.strokeDasharray = `${circumference} ${circumference}`;
+      const offset = circumference - (percent / 100) * circumference;
+      circle.style.strokeDashoffset = offset;
+      circle.style.transform = "rotate(-90deg)";
+      circle.style.transformOrigin = "center";
+    }
+  
+window.onload = function () {
+  const params = new URLSearchParams(window.location.search);
+  const h = params.get("h");
+  const m = params.get("m");
+  const s = params.get("s");
+  const d = params.get("d");
+  const esquema = params.get("esquema");
+
+  if (h !== null) document.getElementById("hours").value = Number(h);
+  if (m !== null) document.getElementById("minutes").value = Number(m);
+  if (s !== null) document.getElementById("seconds").value = Number(s);
+  convertTimeToPercentages();
+
+  if (d) {
+    const distanceMap = {
+      "Maraton": "#8A4DFF",
+      "Media Maraton": "#0066FF",
+      "10K": "#FFA94D",
+      "5K": "#00FF66"
+    };
+    const cleanedD = d.normalize("NFD").replace(/[̀-ͯ]/g, "");
+    const select = document.getElementById("distanceSelect");
+    for (const option of select.options) {
+      const cleanLabel = option.text.normalize("NFD").replace(/[̀-ͯ]/g, "");
+      if (cleanLabel === cleanedD) {
+        select.value = option.value;
+        document.getElementById("centerDot").style.backgroundColor = option.value;
+        break;
+      }
+    }
+  }
+
+  if (esquema) {
+    const paletteMap = {
+      "resistencia": ["#894DFB", "#3F9DFE", "#3FCF77"],
+      "tregua": ["#FF1514", "#201C73", "#F12A2A"],
+      "alivio": ["#FF6B6B", "#FFA94D", "#FFD93D"]
+    };
+    const colores = paletteMap[esquema.toLowerCase()];
+    if (colores) {
+      setPalette(...colores);
+    }
+  }
+};
+
+</script>
+</body>
+</html>
