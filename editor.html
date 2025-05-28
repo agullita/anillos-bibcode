@@ -77,10 +77,10 @@ circle.animated-ring {
 <label>Distancia:</label>
 <select id="distanceSelect" onchange="setDotColorFromDistance()">
 <option value="">-- Selecciona --</option>
-<option value="#8A4DFF">Maratón</option>
-<option value="#0066FF">Media Maratón</option>
-<option value="#FFA94D">10K</option>
-<option value="#00FF66">5K</option>
+<option value="Maratón">Maratón</option>
+<option value="Media Maratón">Media Maratón</option>
+<option value="10K">10K</option>
+<option value="5K">5K</option>
 </select>
 </div>
 <div>
@@ -124,16 +124,40 @@ window.onload = function () {
   if (h) document.getElementById("hours").value = h;
   if (m) document.getElementById("minutes").value = m;
   if (s) document.getElementById("seconds").value = s;
+  
   if (d) {
-    document.getElementById("distanceSelect").value = d;
-    setDotColorFromDistance();
+    const map = {
+      "Maratón": "#8A4DFF",
+      "Media Maratón": "#0066FF",
+      "10K": "#FFA94D",
+      "5K": "#00FF66"
+    };
+    const color = map[d];
+    if (color) {
+      document.getElementById("distanceSelect").value = color;
+      document.getElementById("centerDot").style.backgroundColor = color;
+    }
   }
-  if (c1) document.getElementById("color1").value = `#${c1}`;
+if (c1) document.getElementById("color1").value = `#${c1}`;
   if (c2) document.getElementById("color2").value = `#${c2}`;
   if (c3) document.getElementById("color3").value = `#${c3}`;
 
   updateRingColors();
   convertTimeToPercentages();
+
+  const esquema = params.get("esquema");
+  if (esquema) {
+    const paletteMap = {
+      "resistencia": ["#894DFB", "#3F9DFE", "#3FCF77"],  // Oceanic
+      "tregua": ["#FF1514", "#201C73", "#F12A2A"],       // Contraste Fuerte
+      "alivio": ["#FF6B6B", "#FFA94D", "#FFD93D"]        // Sunset Warm
+    };
+    const colores = paletteMap[esquema.toLowerCase()];
+    if (colores) {
+      setPalette(...colores);
+    }
+  }
+
 }
 
 function convertTimeToPercentages() {
@@ -152,10 +176,18 @@ function convertTimeToPercentages() {
 
     function setDotColorFromDistance() {
       const select = document.getElementById("distanceSelect");
-      const color = select.value;
+      const value = select.value;
+      const colorMap = {
+        "Maratón": "#8A4DFF",
+        "Media Maratón": "#0066FF",
+        "10K": "#FFA94D",
+        "5K": "#00FF66"
+      };
+      const color = colorMap[value];
       if (color) {
         document.getElementById("centerDot").style.backgroundColor = color;
       }
+    }
     }
 
     function updateRingColors() {
